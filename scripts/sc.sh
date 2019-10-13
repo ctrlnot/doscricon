@@ -7,7 +7,7 @@ artist=""
 album=""
 cover=""
 
-while getopts l:o:t:r:b:c flag; do
+while getopts l:o:t:r:b:c:f flag; do
   case "${flag}" in
     l) sclink="${OPTARG}";;
     o) outputFilename="${OPTARG}";;
@@ -30,10 +30,10 @@ if [ -z "$outputFilename" ]
     exit 1
 fi
 
-youtube-dl "$sclink" --add-metadata --print-json > metadata
+youtube-dl "$sclink" --add-metadata --print-json > metadata.json
 
-tempFilename=$(jq -r "._filename" metadata)
-outputExt=$(jq -r ".ext" metadata)
+tempFilename=$(jq -r "._filename" metadata.json)
+outputExt=$(jq -r ".ext" metadata.json)
 outputFilename="$outputFilename.mp3"
 tempFileNameConvert="t.mp3"
 args=("-i" "$tempFilename")
@@ -83,12 +83,13 @@ args+=("-metadata" "comment=Source: $sclink")
 
 if [ "$outputExt" != "mp3" ]
   then
-    ffmpeg -loglevel quiet -i "$tempFilename" -ab 320k "$tempFileNameConvert"
+    ffmpeg -loglevel debug -i "$tempFilename" -ab 320k "$tempFileNameConvert"
     args[1]="$tempFileNameConvert"
 fi
 
-ffmpeg -loglevel quiet "${args[@]}" -acodec copy "$outputFilename"
+ffmpeg -loglevel debug "${args[@]}" -acodec copy "$outputFilename"
 
 [ -f $tempFileNameConvert ] && rm $tempFileNameConvert
+[ -f thumbnailCover ] && rm thumbnailCover
 rm $tempFilename
-rm metadata
+rm metadata.json
