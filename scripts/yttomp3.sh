@@ -52,28 +52,22 @@ if [ "$start" != "0" ] || [ "$end" != "0" ]
     rm "$toTrimFileName"
 fi
 
-if ! [ -z "$cover" ]
+if [ "$cover" = "center" ]
   then
-    if [ "$cover" = "true" ]
-      then
-        echo "[ffmpeg] Embedding youtube thumbnail as cover art on track..."
-        youtube-dl "$ytlink" --write-thumbnail --skip-download --output "rawcover.jpg"
-        convert -size 1280x1280 xc:transparent transparent.png
-        composite -gravity center rawcover.jpg transparent.png coverart.png
-        rm transparent.png
-    fi
-
-    if [ "$cover" = "center" ]
-      then
-        echo "[ffmpeg] Embedding youtube thumbnail center as cover art on track..."
-        youtube-dl "$ytlink" --write-thumbnail --skip-download --output "rawcover.jpg"
-        convert "rawcover.jpg" -crop 720x720+280+0 coverart.png
-    fi
-
-    rm rawcover.jpg
-    cover="coverart.png"
-    args+=("-i" "$cover" "-map" "0:0" "-map" "1:0" "-c" "copy" "-id3v2_version" "3" "-metadata:s:v" "title=Album Cover" "-metadata:s:v" "comment=Cover (front)")
+    echo "[ffmpeg] Embedding youtube thumbnail center as cover art on track..."
+    youtube-dl "$ytlink" --write-thumbnail --skip-download --output "rawcover.jpg"
+    convert "rawcover.jpg" -crop 720x720+280+0 coverart.png
+  else
+    echo "[ffmpeg] Embedding youtube thumbnail as cover art on track..."
+    youtube-dl "$ytlink" --write-thumbnail --skip-download --output "rawcover.jpg"
+    convert -size 1280x1280 xc:transparent transparent.png
+    composite -gravity center rawcover.jpg transparent.png coverart.png
+    rm transparent.png
 fi
+
+rm rawcover.jpg
+cover="coverart.png"
+args+=("-i" "$cover" "-map" "0:0" "-map" "1:0" "-c" "copy" "-id3v2_version" "3" "-metadata:s:v" "title=Album Cover" "-metadata:s:v" "comment=Cover (front)")
 
 args+=("-metadata" "title=$title" "-metadata" "artist=$artist" "-metadata" "album=$album" "-metadata" "comment=Source: $ytlink")
 ffmpeg -loglevel quiet "${args[@]}" -acodec copy "$outputFileName"
