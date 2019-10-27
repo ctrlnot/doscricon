@@ -30,15 +30,16 @@ if [ -z "$outputFilename" ]
     exit 1
 fi
 
-youtube-dl "$sclink" --add-metadata --print-json > metadata.json
+metadataFile="metadata.json"
+youtube-dl "$sclink" --add-metadata --print-json > "$metadataFile"
 
-tempFilename=$(jq -r "._filename" metadata.json)
-outputExt=$(jq -r ".ext" metadata.json)
+tempFilename=$(jq -r "._filename" "$metadataFile")
+outputExt=$(jq -r ".ext" "$metadataFile")
 outputFilename="$outputFilename.mp3"
 tempFileNameConvert="t.mp3"
 args=("-i" "$tempFilename")
 
-thumbnail=$(echo $(jq ".thumbnail" metadata.json) | sed 's/\"//g')
+thumbnail=$(echo $(jq ".thumbnail" "$metadataFile") | sed 's/\"//g')
 original=$(echo $thumbnail | sed 's/t500x500/original/g')
 
 wget -qO thumbnailCover "$thumbnail"
@@ -58,8 +59,6 @@ if [ -f originalCover ]
           then
             convert -debug None originalCover -resize 1400x1400 originalCover
         fi
-      else
-        rm originalCover
     fi
 fi
 args+=("-i" "$cover" "-map" "0:0" "-map" "1:0" "-c" "copy" "-id3v2_version" "3" "-metadata:s:v" "title=Album Cover" "-metadata:s:v" "comment=Cover (front)")
@@ -83,13 +82,14 @@ args+=("-metadata" "comment=Source: $sclink")
 
 if [ "$outputExt" != "mp3" ]
   then
-    ffmpeg -loglevel debug -i "$tempFilename" -ab 320k "$tempFileNameConvert"
+    ffmpeg -loglevel quiet -i "$tempFilename" -ab 320k "$tempFileNameConvert"
     args[1]="$tempFileNameConvert"
 fi
 
-ffmpeg -loglevel debug "${args[@]}" -acodec copy "$outputFilename"
+ffmpeg -loglevel quiet "${args[@]}" -acodec copy "$outputFilename"
 
 [ -f $tempFileNameConvert ] && rm $tempFileNameConvert
+[ -f "$tempFilename" ] && rm "$tempFilename"
+[ -f "$metadataFile" ] && rm "$metadataFile"
 [ -f thumbnailCover ] && rm thumbnailCover
-rm $tempFilename
-rm metadata.json
+[ -f originalCover ] && rm originalCover
