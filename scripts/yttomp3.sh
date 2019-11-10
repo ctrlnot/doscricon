@@ -60,17 +60,17 @@ if [ "$cover" = "center" ]
   else
     echo "[ffmpeg] Embedding youtube thumbnail as cover art on track..."
     youtube-dl "$ytlink" --write-thumbnail --skip-download --output "rawcover.jpg"
-    convert -size 1280x1280 xc:transparent transparent.png
+    convert -size 1280x1280 xc:transparent png24:transparent.png
     composite -gravity center rawcover.jpg transparent.png coverart.png
     rm transparent.png
 fi
 
-rm rawcover.jpg
 cover="coverart.png"
 args+=("-i" "$cover" "-map" "0:0" "-map" "1:0" "-c" "copy" "-id3v2_version" "3" "-metadata:s:v" "title=Album Cover" "-metadata:s:v" "comment=Cover (front)")
 
 args+=("-metadata" "title=$title" "-metadata" "artist=$artist" "-metadata" "album=$album" "-metadata" "comment=Source: $ytlink")
 ffmpeg -loglevel quiet "${args[@]}" -acodec copy "$outputFileName"
 
-rm $tempFilename
-rm $cover
+[ -f "$cover" ] && rm "$cover"
+[ -f rawcover.jpg ] && rm rawcover.jpg
+[ -f "$tempFilename" ] && rm "$tempFilename"
