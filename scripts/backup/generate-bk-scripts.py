@@ -1,8 +1,6 @@
 import json
 import datetime
 
-purgatory_folder_name = '000'
-
 with open('scripts/backup/config.json') as config_data:
   config = json.load(config_data)
 
@@ -27,7 +25,8 @@ with open('scripts/backup/config.json') as config_data:
 
       script_file.write(f'\nrsync -avP{str_bool_opts} --backup --backup-dir="{backup_dir}/$today" "{source}/" "{dest}"\n')
 
-      if options.get('hasPurgatory'):
+      if options['purgatory']:
+        purgatory_folder_name = options['purgatory'] or '000'
         script_file.write(f'\nrsync -avP --delete --backup --backup-dir="{backup_dir}/$today/{purgatory_folder_name}" "{source}/{purgatory_folder_name}/" "{dest}/{purgatory_folder_name}"\n')
 
       if options['cleanVersions']:
