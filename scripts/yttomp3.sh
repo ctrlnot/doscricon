@@ -52,17 +52,22 @@ if [ "$start" != "0" ] || [ "$end" != "0" ]
     rm "$toTrimFileName"
 fi
 
-if [ "$cover" = "center" ]
-  then
-    echo "[ffmpeg] Embedding youtube thumbnail center as cover art on track..."
-    youtube-dl "$ytlink" --write-thumbnail --skip-download --output "rawcover.jpg"
-    convert "rawcover.jpg" -crop 720x720+280+0 coverart.png
-  else
-    echo "[ffmpeg] Embedding youtube thumbnail as cover art on track..."
-    youtube-dl "$ytlink" --write-thumbnail --skip-download --output "rawcover.jpg"
-    convert -size 1280x1280 xc:transparent png24:transparent.png
-    composite -gravity center rawcover.jpg transparent.png coverart.png
-    rm transparent.png
+metadataFile="metadata.json"
+if ! [ -z "$cover" ]; then
+  youtube-dl "$ytlink" --add-metadata --print-json --skip-download > "$metadataFile"
+  thumbnailLink=$(echo $(jq ".thumbnail" "$metadataFile") | sed 's/hqdefault/maxresdefault/g' | sed 's/\"//g')
+  wget -qO "rawcover.jpg" "$thumbnailLink"
+
+  if [ "$cover" = "center" ]
+    then
+      echo "[ffmpeg] Embedding youtube thumbnail center as cover art on track..."
+      convert "rawcover.jpg" -crop 720x720+280+0 coverart.png
+    else
+      echo "[ffmpeg] Embedding youtube thumbnail as cover art on track..."
+      convert -size 1280x1280 xc:transparent png24:transparent.png
+      composite -gravity center rawcover.jpg transparent.png coverart.png
+      rm transparent.png
+  fi
 fi
 
 cover="coverart.png"
@@ -73,4 +78,5 @@ ffmpeg -loglevel quiet "${args[@]}" -acodec copy "$outputFileName"
 
 [ -f "$cover" ] && rm "$cover"
 [ -f rawcover.jpg ] && rm rawcover.jpg
+[ -f "$metadataFile" ] && rm "$metadataFile"
 [ -f "$tempFilename" ] && rm "$tempFilename"
