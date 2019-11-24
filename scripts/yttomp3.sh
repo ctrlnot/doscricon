@@ -48,7 +48,14 @@ if [ "$start" != "0" ] || [ "$end" != "0" ]
     toTrimFileName="totrim.mp3"
     cp "$tempFilename" "$toTrimFileName"
     rm "$tempFilename"
-    ffmpeg -loglevel quiet -i "$toTrimFileName" -ss "$start" -to "$end" -acodec copy "$tempFilename"
+
+    # do not add `-to` arg if -e arg is not passed
+    trimArgs=("-i" "$toTrimFileName" "-ss" "$start")
+    if [ "$end" != "0" ]; then
+      trimArgs+=("-to" "$end")
+    fi
+
+    ffmpeg -loglevel quiet "${trimArgs[@]}" -acodec copy "$tempFilename"
     rm "$toTrimFileName"
 fi
 
