@@ -6,3 +6,6 @@ alias ytdlav="ytdla -o '~/Desktop/%(uploader)s/%(title)s - %(id)s.%(ext)s'"
 
 alias yttomp3="~/doscricon/scripts/yttomp3.sh"
 alias sc="~/doscricon/scripts/sc.sh"
+
+alias flactomp3="~/doscricon/scripts/flac-to-mp3.sh"
+alias musictree="tree --noreport --dirsfirst ~/Music > music.txt"
