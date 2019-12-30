@@ -75,12 +75,28 @@ if ! [ -z "$cover" ]; then
       composite -gravity center rawcover.jpg transparent.png coverart.png
       rm transparent.png
   fi
+
+  cover="coverart.png"
+  args+=("-i" "$cover" "-map" "0:0" "-map" "1:0" "-c" "copy" "-id3v2_version" "3" "-metadata:s:v" "title=Album Cover" "-metadata:s:v" "comment=Cover (front)")
 fi
 
-cover="coverart.png"
-args+=("-i" "$cover" "-map" "0:0" "-map" "1:0" "-c" "copy" "-id3v2_version" "3" "-metadata:s:v" "title=Album Cover" "-metadata:s:v" "comment=Cover (front)")
+if ! [ -z "$title" ]
+  then
+    args+=("-metadata" "title=$title")
+fi
 
-args+=("-metadata" "title=$title" "-metadata" "artist=$artist" "-metadata" "album=$album" "-metadata" "comment=Source: $ytlink")
+if ! [ -z "$artist" ]
+  then
+    args+=("-metadata" "artist=$artist" "-metadata" "album_artist=$artist")
+fi
+
+if ! [ -z "$album" ]
+  then
+    args+=("-metadata" "album=$album")
+fi
+
+args+=("-metadata" "comment=Source: $ytlink")
+
 ffmpeg -loglevel quiet "${args[@]}" -acodec copy "$outputFileName"
 
 [ -f "$cover" ] && rm "$cover"
