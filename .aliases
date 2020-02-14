@@ -8,4 +8,5 @@ alias yttomp3="~/doscricon/scripts/yttomp3.sh"
 alias sc="~/doscricon/scripts/sc.sh"
 
 alias flactomp3="~/doscricon/scripts/flac-to-mp3.sh"
+alias ptac="~doscricon/scripts/pic-to-album-cover.sh"
 alias musictree="tree --noreport --dirsfirst ~/Music > music.txt"
