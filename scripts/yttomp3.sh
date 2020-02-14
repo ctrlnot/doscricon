@@ -61,22 +61,24 @@ fi
 
 metadataFile="metadata.json"
 if ! [ -z "$cover" ]; then
-  youtube-dl "$ytlink" --add-metadata --print-json --skip-download > "$metadataFile"
-  thumbnailLink=$(echo $(jq ".thumbnail" "$metadataFile") | sed 's/hqdefault/maxresdefault/g' | sed 's/\"//g')
-  wget -qO "rawcover.jpg" "$thumbnailLink"
-
-  if [ "$cover" = "center" ]
+  if [ "$cover" = "center" ] || [ "$cover" = "thumbnail" ]
     then
-      echo "[ffmpeg] Embedding youtube thumbnail center as cover art on track..."
-      convert "rawcover.jpg" -crop 720x720+280+0 coverart.png
-    else
-      echo "[ffmpeg] Embedding youtube thumbnail as cover art on track..."
-      convert -size 1280x1280 xc:transparent png24:transparent.png
-      composite -gravity center rawcover.jpg transparent.png coverart.png
-      rm transparent.png
-  fi
+      youtube-dl "$ytlink" --add-metadata --print-json --skip-download > "$metadataFile"
+      thumbnailLink=$(echo $(jq ".thumbnail" "$metadataFile") | sed 's/hqdefault/maxresdefault/g' | sed 's/\"//g')
+      wget -qO "rawcover.jpg" "$thumbnailLink"
 
-  cover="coverart.png"
+      if [ "$cover" = "center" ]
+        then
+          echo "[ffmpeg] Embedding youtube thumbnail center as cover art on track..."
+          convert "rawcover.jpg" -crop 720x720+280+0 coverart.png
+        elif [ "$cover" = "thumbnail" ]; then
+          echo "[ffmpeg] Embedding youtube thumbnail as cover art on track..."
+          convert -size 1280x1280 xc:transparent png24:transparent.png
+          composite -gravity center rawcover.jpg transparent.png coverart.png
+          rm transparent.png
+      fi
+      cover="coverart.png"
+  fi
   args+=("-i" "$cover" "-map" "0:0" "-map" "1:0" "-c" "copy" "-id3v2_version" "3" "-metadata:s:v" "title=Album Cover" "-metadata:s:v" "comment=Cover (front)")
 fi
 
