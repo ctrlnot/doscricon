@@ -10,7 +10,6 @@ if ! [ -z "$2" ]; then
   background="#$2"
 fi
 
-
 picWidth=$(identify -format '%w' $1)
 extension="${1##*.}"
 filename=$(basename $1 ".$extension")
