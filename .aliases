@@ -4,6 +4,7 @@ alias ytdla="yt --write-info-json --no-continue --download-archive '~/archive.lo
 alias ytdlapl="ytdla -o '~/Desktop/%(playlist_uploader)s/%(playlist)s/%(playlist_index)s - %(title)s - %(id)s.%(ext)s'"
 alias ytdlav="ytdla -o '~/Desktop/%(uploader)s/%(title)s - %(id)s.%(ext)s'"
 
+alias ytthumb="youtube-dl --write-thumbnail --skip-download"
 alias yttomp3="~/doscricon/scripts/yttomp3.sh"
 alias sc="~/doscricon/scripts/sc.sh"
 
