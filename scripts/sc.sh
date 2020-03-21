@@ -55,12 +55,13 @@ if [ -f originalCover ]
         rm thumbnailCover
         cover=originalCover
 
-        if [ "$originalWidth" -gt 1400 ]
+        if [ "$originalWidth" -gt 3000 ]
           then
-            convert -debug None originalCover -resize 1400x1400 originalCover
+            convert -debug None originalCover -resize 3000x3000 originalCover
         fi
     fi
 fi
+
 args+=("-i" "$cover" "-map" "0:0" "-map" "1:0" "-c" "copy" "-id3v2_version" "3" "-metadata:s:v" "title=Album Cover" "-metadata:s:v" "comment=Cover (front)")
 
 if ! [ -z "$title" ]
