@@ -22,23 +22,15 @@ while getopts l:o:t:r:b:c:s:e: flag; do
   esac
 done
 
-if [ -z "$ytlink" ]
-  then
-    echo "No youtube link is passed! Exiting..."
-    exit 1
-fi
-
-if [ -z "$outputFileName" ]
-  then
-    echo "Output filename is required! Exiting..."
-    exit 1
-fi
+[ -z "$ytlink" ] && echo "No youtube link is passed! Exiting..." && exit
+[ -z "$outputFileName" ] && echo "Output filename is required! Exiting..." && exit
 
 youtube-dl "$ytlink" --add-metadata --extract-audio --audio-format mp3 --output "temp.%(ext)s"
 
 tempFilename="temp.mp3"
 outputFileName="$outputFileName.mp3"
 args=("-i" "$tempFilename")
+ytthumbtac="/home/t2x/doscricon/scripts/ytthumb-to-album-cover.sh"
 
 if [ "$start" != "0" ] || [ "$end" != "0" ]
   then
@@ -61,41 +53,18 @@ fi
 
 metadataFile="metadata.json"
 if ! [ -z "$cover" ]; then
-  if [ "$cover" = "center" ] || [ "$cover" = "thumbnail" ]
+  if ! [[ "$cover" =~ "." ]] # 
     then
-      youtube-dl "$ytlink" --add-metadata --print-json --skip-download > "$metadataFile"
-      thumbnailLink=$(echo $(jq ".thumbnail" "$metadataFile") | sed 's/hqdefault/maxresdefault/g' | sed 's/\"//g')
-      wget -qO "rawcover.jpg" "$thumbnailLink"
-
-      if [ "$cover" = "center" ]
-        then
-          echo "[ffmpeg] Embedding youtube thumbnail center as cover art on track..."
-          convert "rawcover.jpg" -crop 720x720+280+0 coverart.png
-        elif [ "$cover" = "thumbnail" ]; then
-          echo "[ffmpeg] Embedding youtube thumbnail as cover art on track..."
-          convert -size 1280x1280 xc:transparent png24:transparent.png
-          composite -gravity center rawcover.jpg transparent.png coverart.png
-          rm transparent.png
-      fi
-      cover="coverart.png"
+      outputCover="coverart"
+      sh $ytthumbtac $ytlink "$outputCover.jpg" $cover
+      cover="$outputCover.png"
   fi
   args+=("-i" "$cover" "-map" "0:0" "-map" "1:0" "-c" "copy" "-id3v2_version" "3" "-metadata:s:v" "title=Album Cover" "-metadata:s:v" "comment=Cover (front)")
 fi
 
-if ! [ -z "$title" ]
-  then
-    args+=("-metadata" "title=$title")
-fi
-
-if ! [ -z "$artist" ]
-  then
-    args+=("-metadata" "artist=$artist" "-metadata" "album_artist=$artist")
-fi
-
-if ! [ -z "$album" ]
-  then
-    args+=("-metadata" "album=$album")
-fi
+! [ -z "$title" ] && args+=("-metadata" "title=$title")
+! [ -z "$artist" ] && args+=("-metadata" "artist=$artist" "-metadata" "album_artist=$artist")
+! [ -z "$album" ] && args+=("-metadata" "album=$album")
 
 args+=("-metadata" "comment=Source: $ytlink")
 
