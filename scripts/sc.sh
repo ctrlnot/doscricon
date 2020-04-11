@@ -6,8 +6,9 @@ title=""
 artist=""
 album=""
 cover=""
+archive=""
 
-while getopts l:o:t:r:b:c:f flag; do
+while getopts l:o:t:r:b:c:a:f flag; do
   case "${flag}" in
     l) sclink="${OPTARG}";;
     o) outputFilename="${OPTARG}";;
@@ -15,6 +16,7 @@ while getopts l:o:t:r:b:c:f flag; do
     r) artist="${OPTARG}";;
     b) album="${OPTARG}";;
     c) cover="${OPTARG}";;
+    a) archive="${OPTARG}";;
   esac
 done
 
@@ -30,7 +32,7 @@ if [ -z "$outputFilename" ]
     exit 1
 fi
 
-metadataFile="metadata.json"
+metadataFile="$outputFilename.json"
 youtube-dl "$sclink" --add-metadata --print-json > "$metadataFile"
 
 tempFilename=$(jq -r "._filename" "$metadataFile")
@@ -91,6 +93,6 @@ ffmpeg -loglevel quiet "${args[@]}" -acodec copy "$outputFilename"
 
 [ -f $tempFileNameConvert ] && rm $tempFileNameConvert
 [ -f "$tempFilename" ] && rm "$tempFilename"
-[ -f "$metadataFile" ] && rm "$metadataFile"
+[ "$archive" != "true" ] && [ -f "$metadataFile" ] && rm "$metadataFile"
 [ -f thumbnailCover ] && rm thumbnailCover
 [ -f originalCover ] && rm originalCover
