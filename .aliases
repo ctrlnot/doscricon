@@ -15,3 +15,5 @@ alias flactomp3="~/doscricon/scripts/flac-to-mp3.sh"
 alias ptac="~/doscricon/scripts/pic-to-album-cover.sh"
 alias musictree="tree --noreport --dirsfirst ~/Music > music.txt"
 alias ytthumbtac="~/doscricon/scripts/ytthumb-to-album-cover.sh"
+
+alias fbdl="~/doscricon/scripts/fb.sh"
