@@ -25,12 +25,18 @@ done
 [ -z "$ytlink" ] && echo "No youtube link is passed! Exiting..." && exit
 [ -z "$outputFileName" ] && echo "Output filename is required! Exiting..." && exit
 
+baseFolderOutput=$(jq -r ".baseFolderOutput" "$configJson")
+
+if [ "$baseFolderOutput" == "null" ]; then
+  baseFolderOutput="$HOME"
+fi
+
 youtube-dl "$ytlink" --add-metadata --extract-audio --audio-format mp3 --output "temp.%(ext)s"
 
 tempFilename="temp.mp3"
-mp3OutputFileName="$outputFileName.mp3"
+mp3OutputFileName="$baseFolderOutput/$outputFileName.mp3"
 args=("-i" "$tempFilename")
-ytthumbtac="/home/t2x/doscricon/scripts/ytthumb-to-album-cover.sh"
+ytthumbtac="$HOME/doscricon/scripts/ytthumb-to-album-cover.sh"
 
 if [ "$start" != "0" ] || [ "$end" != "0" ]
   then
