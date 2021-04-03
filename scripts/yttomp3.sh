@@ -28,7 +28,7 @@ done
 youtube-dl "$ytlink" --add-metadata --extract-audio --audio-format mp3 --output "temp.%(ext)s"
 
 tempFilename="temp.mp3"
-outputFileName="$outputFileName.mp3"
+mp3OutputFileName="$outputFileName.mp3"
 args=("-i" "$tempFilename")
 ytthumbtac="/home/t2x/doscricon/scripts/ytthumb-to-album-cover.sh"
 
@@ -51,13 +51,11 @@ if [ "$start" != "0" ] || [ "$end" != "0" ]
     rm "$toTrimFileName"
 fi
 
-metadataFile="metadata.json"
 if ! [ -z "$cover" ]; then
   if ! [[ "$cover" =~ "." ]] # 
     then
-      outputCover="coverart"
-      sh $ytthumbtac $ytlink "$outputCover.jpg" $cover
-      cover="$outputCover.png"
+      sh $ytthumbtac $ytlink "$outputFileName" "$cover"
+      cover="$outputFileName.png" # expects that ytthumbtac will always result to png
   fi
   args+=("-i" "$cover" "-map" "0:0" "-map" "1:0" "-c" "copy" "-id3v2_version" "3" "-metadata:s:v" "title=Album Cover" "-metadata:s:v" "comment=Cover (front)")
 fi
@@ -68,9 +66,7 @@ fi
 
 args+=("-metadata" "comment=Source: $ytlink")
 
-ffmpeg -loglevel quiet "${args[@]}" -acodec copy "$outputFileName"
+ffmpeg -loglevel quiet "${args[@]}" -acodec copy "$mp3OutputFileName"
 
 [ -f "$cover" ] && rm "$cover"
-[ -f rawcover.jpg ] && rm rawcover.jpg
-[ -f "$metadataFile" ] && rm "$metadataFile"
 [ -f "$tempFilename" ] && rm "$tempFilename"
